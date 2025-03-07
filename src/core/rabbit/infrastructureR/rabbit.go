@@ -20,57 +20,61 @@ type RabbitMQConfig struct {
 }
 
 func NewRabbitMQ() (*RabbitMQ, error) {
+
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("no se pueden cargar datos del archivo .env", err)
+		log.
+			Fatalf("Error al cargar el archivo .env: %v", err)
 	}
-
-	rabbitURL := os.Getenv("RABBIT_URL")
-	queueName := os.Getenv("QUEUE_TWO")
+	rabbitURL := os.Getenv("RABBITMQ_URL")
+	queueName := os.Getenv("QUEUE_NAME")
 
 	if rabbitURL == "" || queueName == "" {
-		return nil, fmt.Errorf("valores indefinidos")
+		return nil, fmt.Errorf("variables de entorno RABBITMQ indefinidas")
 	}
+
 	conn, err := amqp.Dial(rabbitURL)
 	if err != nil {
-		return nil, fmt.Errorf("no se puede conctar al servidor: %w", err)
+		return nil, fmt.Errorf("error al conectar con RabbitMQ: %w", err)
 	}
-	fmt.Println("conectado a rabbit...")
+	fmt.Println("conectado a rabbit")
 
 	ch, err := conn.Channel()
 	if err != nil {
-		return nil, fmt.Errorf("no se puede abrir el canal en rabbit", err)
+		return nil, fmt.Errorf("error al abrir el canal de RabbitMQ: %w", err)
 	}
+
 	_, err = ch.QueueDeclare(
-		queueName,
-		true,  //durable
-		false, //auto-delete
-		false, //exclusive
-		false, //nowait
-		nil,   //argumentos adicionales
+		queueName, // Nombre de la cola
+		true,      // Durable
+		false,     // Auto-delete
+		false,     // Exclusive
+		false,     // NoWait
+		nil,       // Argumentos adicionales
 	)
 	if err != nil {
-		return nil, fmt.Errorf("no se puede declarar la cola: %w", err)
+		return nil, fmt.Errorf("error al declarar la cola: %w", err)
 	}
+
 	return &RabbitMQ{
 		connection: conn,
 		channel:    ch,
 	}, nil
 }
 
-func (client *RabbitMQ) SendNotification(queueName string, msg []byte) error {
+func (client *RabbitMQ) PublishMessage(queueName string, message []byte) error {
 	err := client.channel.Publish(
-		"",
-		queueName,
-		false, //obligatorio
-		false, //inmediato
+		"",        // Exchange
+		queueName, // Routing key (nombre de la cola)
+		false,     // Mandatory
+		false,     // Immediate
 		amqp.Publishing{
-			ContentType: "applitation/json",
-			Body:        msg,
+			ContentType: "application/json",
+			Body:        message,
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("no se puede notificar %w", err)
+		return fmt.Errorf("error al publicar mensaje: %w", err)
 	}
 	return nil
 }
