@@ -26,7 +26,7 @@ func NewRabbitMQ() (*RabbitMQ, error) {
 		log.
 			Fatalf("Error al cargar el archivo .env: %v", err)
 	}
-	rabbitURL := os.Getenv("RABBITMQ_URL")
+	rabbitURL := os.Getenv("RABBIT_URL")
 	queueName := os.Getenv("QUEUE_NAME")
 
 	if rabbitURL == "" || queueName == "" {
