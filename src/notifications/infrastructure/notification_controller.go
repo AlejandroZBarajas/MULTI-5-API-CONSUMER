@@ -29,7 +29,7 @@ func (nc *NotificationController) CreateNewHandler(w http.ResponseWriter, r *htt
 		return
 	}
 	var notification struct {
-		msg string `json:"msg"`
+		Msg string `json:"msg"`
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&notification)
@@ -38,16 +38,16 @@ func (nc *NotificationController) CreateNewHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	fmt.Printf("Datos recibidos: %v\n", notification)
+	fmt.Printf("Datos recibidos: %v\n", notification.Msg)
 
-	err = nc.CreateNotificationUseCase.Run(notification.msg)
+	err = nc.CreateNotificationUseCase.Run(notification.Msg)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error al registrar evento: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	eventNotification := map[string]interface{}{
-		"device_name": notification.msg,
+		"device_name": notification.Msg,
 		"message":     "Evento registrado desde dispositivo",
 	}
 

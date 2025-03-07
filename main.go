@@ -25,7 +25,7 @@ func main() {
 
 	http.HandleFunc("/notifications", notificationController.CreateNewHandler)
 
-	port := ":8080"
+	port := ":8081"
 	fmt.Printf("Servidor API corriendo en http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, nil))
 }
