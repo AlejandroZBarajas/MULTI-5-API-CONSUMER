@@ -64,10 +64,10 @@ func NewRabbitMQ() (*RabbitMQ, error) {
 
 func (client *RabbitMQ) PublishMessage(queueName string, message []byte) error {
 	err := client.channel.Publish(
-		"",        // Exchange
-		queueName, // Routing key (nombre de la cola)
-		false,     // Mandatory
-		false,     // Immediate
+		"notifications_exchange", // Exchange
+		"notification_queue",     // Routing key (nombre de la cola)
+		false,                    // Mandatory
+		false,                    // Immediate
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        message,
@@ -76,6 +76,7 @@ func (client *RabbitMQ) PublishMessage(queueName string, message []byte) error {
 	if err != nil {
 		return fmt.Errorf("error al publicar mensaje: %w", err)
 	}
+	fmt.Printf("se enviaron los datos: %s", message)
 	return nil
 }
 
